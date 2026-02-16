@@ -2,6 +2,10 @@ import { useState, useRef, ChangeEvent, FormEvent } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { updateUserProfile, uploadProfilePhoto } from '../../services/profile.service'
 import { compressImage, validateImage } from '../../utils/imageHelpers'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function ProfilePage() {
   const { currentUser, userProfile } = useAuth()
@@ -99,25 +103,26 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
-      <div className="bg-white rounded-2xl shadow-lg p-8">
-        <h1 className="text-3xl font-bold text-valentine-red mb-6">Edit Profile</h1>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-3xl">Edit Profile</CardTitle>
+        </CardHeader>
+        <CardContent>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Profile Photo Section */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Profile Photo
-            </label>
+            <Label className="mb-3">Profile Photo</Label>
             <div className="flex items-center gap-6">
               <div className="relative">
                 {currentPhotoUrl ? (
                   <img
                     src={currentPhotoUrl}
                     alt="Profile"
-                    className="w-24 h-24 rounded-full object-cover border-4 border-valentine-pink"
+                    className="w-24 h-24 rounded-full object-cover border-4 border-gray-200"
                   />
                 ) : (
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-valentine-pink to-valentine-red flex items-center justify-center text-white text-3xl font-bold">
+                  <div className="w-24 h-24 rounded-full bg-gray-900 flex items-center justify-center text-white text-3xl font-bold">
                     {userProfile.displayName[0]}
                   </div>
                 )}
@@ -131,21 +136,22 @@ export default function ProfilePage() {
                   className="hidden"
                 />
                 <div className="flex gap-2">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                    variant="outline"
                   >
                     {currentPhotoUrl ? 'Change Photo' : 'Upload Photo'}
-                  </button>
+                  </Button>
                   {(previewUrl || selectedFile) && (
-                    <button
+                    <Button
                       type="button"
                       onClick={handleRemoveImage}
-                      className="px-4 py-2 text-red-500 hover:text-red-600 transition-colors"
+                      variant="ghost"
+                      className="text-red-500 hover:text-red-600"
                     >
                       Remove
-                    </button>
+                    </Button>
                   )}
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
@@ -157,16 +163,13 @@ export default function ProfilePage() {
 
           {/* Display Name Section */}
           <div>
-            <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 mb-2">
-              Display Name
-            </label>
-            <input
+            <Label htmlFor="displayName">Display Name</Label>
+            <Input
               id="displayName"
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               maxLength={50}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-valentine-pink focus:border-transparent transition-all"
               placeholder="Your display name"
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -176,14 +179,11 @@ export default function ProfilePage() {
 
           {/* Username (Read-only) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Username
-            </label>
-            <input
+            <Label>Username</Label>
+            <Input
               type="text"
               value={userProfile.username}
               disabled
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed"
             />
             <p className="text-xs text-gray-500 mt-1">
               Your username cannot be changed.
@@ -195,7 +195,7 @@ export default function ProfilePage() {
             <div>
               <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
                 <div
-                  className="bg-gradient-to-r from-valentine-pink to-valentine-red h-2 rounded-full transition-all duration-300"
+                  className="bg-gray-900 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
@@ -220,15 +220,16 @@ export default function ProfilePage() {
           )}
 
           {/* Submit Button */}
-          <button
+          <Button
             type="submit"
             disabled={uploading}
-            className="w-full bg-gradient-to-r from-valentine-pink to-valentine-red text-white py-3 px-6 rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="w-full bg-gray-900 hover:bg-gray-800 text-white"
           >
             {uploading ? 'Saving...' : 'Save Changes'}
-          </button>
+          </Button>
         </form>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
