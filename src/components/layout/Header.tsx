@@ -2,6 +2,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { logout } from '../../services/auth.service'
 import { useState } from 'react'
+import SpaceSwitcher from '../spaces/SpaceSwitcher'
+import { Button } from '@/components/ui/button'
 
 export default function Header() {
   const { userProfile } = useAuth()
@@ -21,30 +23,24 @@ export default function Header() {
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl">💕</span>
-            <h1 className="text-xl font-bold text-valentine-red">
+          <Link to="/" className="flex items-center">
+            <h1 className="text-xl font-semibold text-gray-900">
               ShellBook
             </h1>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
+            <SpaceSwitcher />
             <Link
               to="/"
-              className="text-gray-700 hover:text-valentine-red transition-colors font-medium"
+              className="text-gray-700 hover:text-gray-900 transition-colors font-medium"
             >
               Feed
             </Link>
             <Link
-              to="/about"
-              className="text-gray-700 hover:text-valentine-red transition-colors font-medium"
-            >
-              About
-            </Link>
-            <Link
               to="/profile"
-              className="text-gray-700 hover:text-valentine-red transition-colors font-medium"
+              className="text-gray-700 hover:text-gray-900 transition-colors font-medium"
             >
               Profile
             </Link>
@@ -52,14 +48,16 @@ export default function Header() {
             {userProfile && (
               <div className="flex items-center space-x-4 border-l border-gray-200 pl-6 ml-2">
                 <span className="text-sm text-gray-600">
-                  Hi, <span className="font-semibold text-valentine-red">{userProfile.displayName}</span>
+                  Hi, <span className="font-semibold text-gray-900">{userProfile.displayName}</span>
                 </span>
-                <button
+                <Button
                   onClick={handleLogout}
-                  className="text-sm text-gray-600 hover:text-valentine-red transition-colors"
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-600 hover:text-gray-900"
                 >
                   Logout
-                </button>
+                </Button>
               </div>
             )}
           </nav>
@@ -67,7 +65,7 @@ export default function Header() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-gray-700 hover:text-valentine-red transition-colors"
+            className="md:hidden p-2 text-gray-700 hover:text-gray-900 transition-colors"
             aria-label="Toggle menu"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,24 +81,20 @@ export default function Header() {
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <nav className="md:hidden mt-4 pt-4 border-t border-gray-200 flex flex-col space-y-3">
+            <div className="py-2">
+              <SpaceSwitcher />
+            </div>
             <Link
               to="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-gray-700 hover:text-valentine-red transition-colors font-medium py-2"
+              className="text-gray-700 hover:text-gray-900 transition-colors font-medium py-2"
             >
               Feed
             </Link>
             <Link
-              to="/about"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-gray-700 hover:text-valentine-red transition-colors font-medium py-2"
-            >
-              About
-            </Link>
-            <Link
               to="/profile"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-gray-700 hover:text-valentine-red transition-colors font-medium py-2"
+              className="text-gray-700 hover:text-gray-900 transition-colors font-medium py-2"
             >
               Profile
             </Link>
@@ -108,17 +102,19 @@ export default function Header() {
             {userProfile && (
               <div className="flex flex-col space-y-3 pt-3 border-t border-gray-200">
                 <span className="text-sm text-gray-600">
-                  Hi, <span className="font-semibold text-valentine-red">{userProfile.displayName}</span>
+                  Hi, <span className="font-semibold text-gray-900">{userProfile.displayName}</span>
                 </span>
-                <button
+                <Button
                   onClick={() => {
                     handleLogout()
                     setMobileMenuOpen(false)
                   }}
-                  className="text-sm text-gray-600 hover:text-valentine-red transition-colors text-left py-2"
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-600 hover:text-gray-900 justify-start"
                 >
                   Logout
-                </button>
+                </Button>
               </div>
             )}
           </nav>

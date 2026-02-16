@@ -23,8 +23,9 @@ service cloud.firestore {
 
     // Users collection
     match /users/{userId} {
-      // Anyone authenticated can read user profiles (for invitations)
-      allow read: if request.auth != null;
+      // Anyone can read user profiles for username validation and invitations
+      // This is safe because user profiles don't contain sensitive data
+      allow read: if true;
 
       // Users can create their own profile during signup
       allow create: if request.auth != null && request.auth.uid == userId;

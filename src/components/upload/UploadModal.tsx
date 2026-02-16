@@ -1,9 +1,12 @@
 import { useState, useRef, FormEvent, ChangeEvent } from 'react'
 import { useAuth } from '../../hooks/useAuth'
+import { useSpace } from '../../context/SpaceContext'
 import { compressImage, validateImage } from '../../utils/imageHelpers'
 import { uploadImage } from '../../services/storage.service'
 import { createPost } from '../../services/posts.service'
 import ImagePreview from './ImagePreview'
+import { Button } from '../ui/button'
+import { Label } from '../ui/label'
 
 interface UploadModalProps {
   onClose: () => void
@@ -11,6 +14,7 @@ interface UploadModalProps {
 
 export default function UploadModal({ onClose }: UploadModalProps) {
   const { currentUser, userProfile } = useAuth()
+  const { currentSpace } = useSpace()
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [caption, setCaption] = useState('')
@@ -48,7 +52,10 @@ export default function UploadModal({ onClose }: UploadModalProps) {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
 
-    if (!selectedFile || !currentUser || !userProfile) {
+    if (!selectedFile || !currentUser || !userProfile || !currentSpace) {
+      if (!currentSpace) {
+        setError('No space selected')
+      }
       return
     }
 
@@ -65,6 +72,7 @@ export default function UploadModal({ onClose }: UploadModalProps) {
 
       // Upload to Firebase Storage
       const { url, path } = await uploadImage(
+        currentSpace.id,
         currentUser.uid,
         postId,
         compressedBlob,
@@ -73,6 +81,7 @@ export default function UploadModal({ onClose }: UploadModalProps) {
 
       // Create post document
       await createPost(
+        currentSpace.id,
         currentUser.uid,
         userProfile.username,
         userProfile.displayName,
@@ -120,7 +129,7 @@ export default function UploadModal({ onClose }: UploadModalProps) {
             {!selectedFile ? (
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center cursor-pointer hover:border-valentine-pink transition-colors"
+                className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center cursor-pointer hover:border-gray-400 transition-colors"
               >
                 <svg
                   className="w-16 h-16 mx-auto mb-4 text-gray-400"
@@ -155,16 +164,16 @@ export default function UploadModal({ onClose }: UploadModalProps) {
             />
 
             <div>
-              <label htmlFor="caption" className="block text-sm font-medium text-gray-700 mb-2">
+              <Label htmlFor="caption" className="text-gray-700 mb-2">
                 Caption
-              </label>
+              </Label>
               <textarea
                 id="caption"
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
                 maxLength={500}
                 rows={3}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-valentine-pink focus:border-transparent transition-all resize-none"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all resize-none mt-2"
                 placeholder="Write a caption..."
               />
               <p className="text-xs text-gray-500 mt-1 text-right">
@@ -182,7 +191,7 @@ export default function UploadModal({ onClose }: UploadModalProps) {
               <div>
                 <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
                   <div
-                    className="bg-gradient-to-r from-valentine-pink to-valentine-red h-2 rounded-full transition-all duration-300"
+                    className="bg-gray-900 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
@@ -193,21 +202,22 @@ export default function UploadModal({ onClose }: UploadModalProps) {
             )}
 
             <div className="flex space-x-4">
-              <button
+              <Button
                 type="button"
                 onClick={onClose}
                 disabled={uploading}
-                className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                variant="outline"
+                className="flex-1"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 disabled={!selectedFile || uploading}
-                className="flex-1 bg-gradient-to-r from-valentine-pink to-valentine-red text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="flex-1 bg-gray-900 text-white hover:bg-gray-800"
               >
                 {uploading ? 'Uploading...' : 'Upload'}
-              </button>
+              </Button>
             </div>
           </form>
         </div>

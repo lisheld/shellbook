@@ -6,7 +6,7 @@ export default function UploadButton({ onClick }: UploadButtonProps) {
   return (
     <button
       onClick={onClick}
-      className="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-r from-valentine-pink to-valentine-red text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 flex items-center justify-center z-50"
+      className="fixed bottom-8 right-8 w-16 h-16 bg-gray-900 text-white rounded-full shadow-lg hover:bg-gray-800 hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center z-50 border-2 border-gray-900"
       aria-label="Upload photo"
     >
       <svg

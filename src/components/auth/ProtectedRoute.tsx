@@ -1,5 +1,6 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { useSpace } from '../../context/SpaceContext'
 import { ReactNode } from 'react'
 
 interface ProtectedRouteProps {
@@ -7,13 +8,15 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { currentUser, loading } = useAuth()
+  const { currentUser, loading: authLoading } = useAuth()
+  const { userSpaces, loading: spaceLoading } = useSpace()
+  const location = useLocation()
 
-  if (loading) {
+  if (authLoading || spaceLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-rose-50 to-red-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="text-6xl mb-4 animate-pulse">💕</div>
+          <div className="w-16 h-16 mx-auto mb-4 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
@@ -22,6 +25,11 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!currentUser) {
     return <Navigate to="/login" replace />
+  }
+
+  // If user has no spaces and not on create-first-space page, redirect
+  if (userSpaces.length === 0 && location.pathname !== '/create-first-space') {
+    return <Navigate to="/create-first-space" replace />
   }
 
   return <>{children}</>

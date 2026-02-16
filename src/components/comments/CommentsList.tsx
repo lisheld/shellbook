@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Comment } from '../../types/Comment'
 import { subscribeToComments } from '../../services/comments.service'
+import { useSpace } from '../../context/SpaceContext'
 import CommentItem from './CommentItem'
 import CommentInput from './CommentInput'
 
@@ -9,18 +10,25 @@ interface CommentsListProps {
 }
 
 export default function CommentsList({ postId }: CommentsListProps) {
+  const { currentSpace } = useSpace()
   const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(true)
   const [isExpanded, setIsExpanded] = useState(false)
 
   useEffect(() => {
-    const unsubscribe = subscribeToComments(postId, (newComments) => {
-      setComments(newComments)
-      setLoading(false)
-    })
+    if (!currentSpace) return
+
+    const unsubscribe = subscribeToComments(
+      currentSpace.id,
+      postId,
+      (newComments) => {
+        setComments(newComments)
+        setLoading(false)
+      }
+    )
 
     return unsubscribe
-  }, [postId])
+  }, [postId, currentSpace?.id])
 
   if (loading) {
     return (
