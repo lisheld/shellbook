@@ -57,8 +57,6 @@ service cloud.firestore {
     match /invitations/{invitationId} {
       // Users can read invitations sent to them or by them
       allow read: if request.auth != null && (
-        request.resource.data.invitedBy == request.auth.uid ||
-        request.resource.data.invitedUsername == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username ||
         resource.data.invitedBy == request.auth.uid ||
         resource.data.invitedUsername == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username
       );
