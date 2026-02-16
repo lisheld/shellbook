@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Posts images in spaces
+    match /spaces/{spaceId}/posts/{userId}/{postId} {
+      // Users can only upload to their own folder
+      allow write: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 5 * 1024 * 1024  // 5MB max
+        && request.resource.contentType.matches('image/.*');
+
+      // All authenticated users can read images
+      // Note: Space membership check should happen at Firestore level
+      allow read: if request.auth != null;
+    }
+
+    // Profile photos
+    match /profile-photos/{userId} {
+      // Users can only upload/update their own profile photo
+      allow write: if request.auth != null
+        && request.auth.uid == userId.replace('.jpg', '')
+        && request.resource.size < 5 * 1024 * 1024  // 5MB max
+        && request.resource.contentType.matches('image/.*');
+
+      // All authenticated users can read profile photos
+      allow read: if request.auth != null;
+    }
+  }
+}

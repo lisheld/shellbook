@@ -1,0 +1,114 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is a member of a space
+    function isSpaceMember(spaceId) {
+      return request.auth != null &&
+        spaceId in get(/databases/$(database)/documents/users/$(request.auth.uid)).data.spaceIds;
+    }
+
+    // Helper function to check if user is space owner
+    function isSpaceOwner(spaceId) {
+      let space = get(/databases/$(database)/documents/spaces/$(spaceId)).data;
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/spaces/$(spaceId)) &&
+        space.members.hasAny([{uid: request.auth.uid, role: 'owner'}]);
+    }
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // Anyone authenticated can read user profiles (for invitations)
+      allow read: if request.auth != null;
+
+      // Users can create their own profile during signup
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      // Users can only update their own profile
+      allow update: if request.auth != null && request.auth.uid == userId;
+
+      // Prevent deletion
+      allow delete: if false;
+    }
+
+    // Spaces collection
+    match /spaces/{spaceId} {
+      // Members can read their spaces
+      allow read: if isSpaceMember(spaceId);
+
+      // Authenticated users can create spaces
+      allow create: if request.auth != null
+        && request.resource.data.creatorId == request.auth.uid;
+
+      // Only owners can update spaces
+      allow update: if isSpaceOwner(spaceId);
+
+      // Only owners can delete spaces
+      allow delete: if isSpaceOwner(spaceId);
+    }
+
+    // Invitations collection
+    match /invitations/{invitationId} {
+      // Users can read invitations sent to them or by them
+      allow read: if request.auth != null && (
+        request.resource.data.invitedBy == request.auth.uid ||
+        request.resource.data.invitedUsername == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username ||
+        resource.data.invitedBy == request.auth.uid ||
+        resource.data.invitedUsername == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username
+      );
+
+      // Space members can create invitations
+      allow create: if request.auth != null
+        && request.resource.data.invitedBy == request.auth.uid
+        && isSpaceMember(request.resource.data.spaceId);
+
+      // Recipients can update status (accept/decline)
+      allow update: if request.auth != null
+        && resource.data.invitedUsername == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username
+        && request.resource.data.status in ['accepted', 'declined'];
+
+      // Sender can delete (cancel) invitations
+      allow delete: if request.auth != null
+        && resource.data.invitedBy == request.auth.uid;
+    }
+
+    // Posts collection
+    match /posts/{postId} {
+      // Space members can read posts in their spaces
+      allow read: if request.auth != null
+        && isSpaceMember(resource.data.spaceId);
+
+      // Space members can create posts in their spaces
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && isSpaceMember(request.resource.data.spaceId)
+        && request.resource.data.caption.size() <= 500;
+
+      // Users can update/delete their own posts
+      allow update, delete: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+    }
+
+    // Comments collection
+    match /comments/{commentId} {
+      // Space members can read comments in their spaces
+      allow read: if request.auth != null
+        && isSpaceMember(resource.data.spaceId);
+
+      // Space members can create comments in their spaces
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && isSpaceMember(request.resource.data.spaceId)
+        && request.resource.data.text.size() <= 500;
+
+      // Users can delete their own comments
+      allow delete: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+    }
+  }
+}

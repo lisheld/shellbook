@@ -1,0 +1,13 @@
+{
+  "firestore": {
+    "database": "(default)",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": [
+    {
+      "bucket": "shellbook-7876d.appspot.com",
+      "rules": "storage.rules"
+    }
+  ]
+}
