@@ -55,10 +55,11 @@ service cloud.firestore {
 
     // Invitations collection
     match /invitations/{invitationId} {
-      // Users can read invitations sent to them or by them
+      // Users can read invitations sent to them, by them, or in spaces they're members of
       allow read: if request.auth != null && (
         resource.data.invitedBy == request.auth.uid ||
-        resource.data.invitedUsername == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username
+        resource.data.invitedUsername == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username ||
+        isSpaceMember(resource.data.spaceId)
       );
 
       // Space members can create invitations
