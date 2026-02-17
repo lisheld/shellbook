@@ -11,7 +11,7 @@ import ProfilePage from './components/profile/ProfilePage'
 
 function App() {
   return (
-    <BrowserRouter basename="/shellbook">
+    <BrowserRouter>
       <AuthProvider>
         <SpaceProvider>
           <div className="min-h-screen bg-gray-50">
