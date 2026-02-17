@@ -8,12 +8,12 @@ service cloud.firestore {
         spaceId in get(/databases/$(database)/documents/users/$(request.auth.uid)).data.spaceIds;
     }
 
-    // Helper function to check if user is space owner
-    function isSpaceOwner(spaceId) {
+    // Helper function to check if user is space leader
+    function isSpaceLeader(spaceId) {
       let space = get(/databases/$(database)/documents/spaces/$(spaceId)).data;
       return request.auth != null &&
         exists(/databases/$(database)/documents/spaces/$(spaceId)) &&
-        space.members.hasAny([{uid: request.auth.uid, role: 'owner'}]);
+        space.members.hasAny([{uid: request.auth.uid, role: 'leader'}]);
     }
 
     // Default deny all
@@ -47,8 +47,8 @@ service cloud.firestore {
       allow create: if request.auth != null
         && request.resource.data.creatorId == request.auth.uid;
 
-      // Owners can update spaces, OR users can add themselves when accepting invitations
-      allow update: if isSpaceOwner(spaceId) ||
+      // Leaders can update spaces, OR users can add themselves when accepting invitations
+      allow update: if isSpaceLeader(spaceId) ||
         (request.auth != null &&
          // Only members array is being modified
          request.resource.data.keys().toSet().difference(resource.data.keys().toSet()).size() == 0 &&
@@ -57,8 +57,8 @@ service cloud.firestore {
          // The new member being added is the current user
          request.resource.data.members[request.resource.data.members.size() - 1].uid == request.auth.uid);
 
-      // Only owners can delete spaces
-      allow delete: if isSpaceOwner(spaceId);
+      // Only leaders can delete spaces
+      allow delete: if isSpaceLeader(spaceId);
     }
 
     // Invitations collection
