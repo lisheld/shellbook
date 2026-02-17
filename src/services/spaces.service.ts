@@ -234,23 +234,10 @@ export async function deleteSpaceAndContent(spaceId: string): Promise<void> {
   const spaceRef = doc(db, 'spaces', spaceId)
   batch.delete(spaceRef)
 
-  // Remove space from all users' spaceIds
-  const spaceDoc = await getDoc(spaceRef)
-  if (spaceDoc.exists()) {
-    const space = spaceDoc.data() as Space
-    for (const member of space.members) {
-      const userRef = doc(db, 'users', member.uid)
-      const userDoc = await getDoc(userRef)
-      if (userDoc.exists()) {
-        const currentSpaceIds = userDoc.data().spaceIds || []
-        batch.update(userRef, {
-          spaceIds: currentSpaceIds.filter((id: string) => id !== spaceId),
-        })
-      }
-    }
-  }
-
   await batch.commit()
+
+  // Note: We don't remove spaceIds from users' profiles
+  // The getUserSpaces function already handles non-existent spaces gracefully
 }
 
 /**
