@@ -39,15 +39,23 @@ service cloud.firestore {
 
     // Spaces collection
     match /spaces/{spaceId} {
-      // Members can read their spaces
-      allow read: if isSpaceMember(spaceId);
+      // Members can read their spaces, OR users accepting invitations can read
+      allow read: if isSpaceMember(spaceId) ||
+        (request.auth != null && resource.data.keys().hasAll(['members']));
 
       // Authenticated users can create spaces
       allow create: if request.auth != null
         && request.resource.data.creatorId == request.auth.uid;
 
-      // Only owners can update spaces
-      allow update: if isSpaceOwner(spaceId);
+      // Owners can update spaces, OR users can add themselves when accepting invitations
+      allow update: if isSpaceOwner(spaceId) ||
+        (request.auth != null &&
+         // Only members array is being modified
+         request.resource.data.keys().toSet().difference(resource.data.keys().toSet()).size() == 0 &&
+         // Members array size increases by exactly 1
+         request.resource.data.members.size() == resource.data.members.size() + 1 &&
+         // The new member being added is the current user
+         request.resource.data.members[request.resource.data.members.size() - 1].uid == request.auth.uid);
 
       // Only owners can delete spaces
       allow delete: if isSpaceOwner(spaceId);
