@@ -35,6 +35,10 @@ export default function CreateFirstSpace() {
     }
   }
 
+  const handleSkip = () => {
+    navigate('/')
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md">
@@ -83,14 +87,30 @@ export default function CreateFirstSpace() {
               </div>
             </div>
 
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gray-900 hover:bg-gray-800 text-white"
-            >
-              {loading ? 'Creating space...' : 'Create Space'}
-            </Button>
+            <div className="space-y-3">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white"
+              >
+                {loading ? 'Creating space...' : 'Create Space'}
+              </Button>
+
+              <Button
+                type="button"
+                onClick={handleSkip}
+                disabled={loading}
+                variant="outline"
+                className="w-full"
+              >
+                Skip for now
+              </Button>
+            </div>
           </form>
+
+          <p className="text-xs text-gray-500 text-center mt-4">
+            You can create a space later or join one through an invitation
+          </p>
         </CardContent>
       </Card>
     </div>
