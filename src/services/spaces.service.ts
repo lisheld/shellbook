@@ -214,34 +214,49 @@ export async function leaveSpace(spaceId: string, userId: string): Promise<void>
  * Only callable by space leader
  */
 export async function deleteSpaceAndContent(spaceId: string): Promise<void> {
-  const batch = writeBatch(db)
+  try {
+    console.log('Starting space deletion for:', spaceId)
 
-  // Delete all posts in the space
-  const postsQuery = query(collection(db, 'posts'), where('spaceId', '==', spaceId))
-  const postsSnapshot = await getDocs(postsQuery)
-  postsSnapshot.forEach((doc) => {
-    batch.delete(doc.ref)
-  })
+    // Delete all posts in the space
+    console.log('Deleting posts...')
+    const postsQuery = query(collection(db, 'posts'), where('spaceId', '==', spaceId))
+    const postsSnapshot = await getDocs(postsQuery)
+    console.log(`Found ${postsSnapshot.size} posts to delete`)
+    for (const postDoc of postsSnapshot.docs) {
+      await deleteDoc(postDoc.ref)
+    }
+    console.log('Posts deleted successfully')
 
-  // Delete all comments in the space
-  const commentsQuery = query(collection(db, 'comments'), where('spaceId', '==', spaceId))
-  const commentsSnapshot = await getDocs(commentsQuery)
-  commentsSnapshot.forEach((doc) => {
-    batch.delete(doc.ref)
-  })
+    // Delete all comments in the space
+    console.log('Deleting comments...')
+    const commentsQuery = query(collection(db, 'comments'), where('spaceId', '==', spaceId))
+    const commentsSnapshot = await getDocs(commentsQuery)
+    console.log(`Found ${commentsSnapshot.size} comments to delete`)
+    for (const commentDoc of commentsSnapshot.docs) {
+      await deleteDoc(commentDoc.ref)
+    }
+    console.log('Comments deleted successfully')
 
-  // Delete all invitations for the space
-  const invitationsQuery = query(collection(db, 'invitations'), where('spaceId', '==', spaceId))
-  const invitationsSnapshot = await getDocs(invitationsQuery)
-  invitationsSnapshot.forEach((doc) => {
-    batch.delete(doc.ref)
-  })
+    // Delete all invitations for the space
+    console.log('Deleting invitations...')
+    const invitationsQuery = query(collection(db, 'invitations'), where('spaceId', '==', spaceId))
+    const invitationsSnapshot = await getDocs(invitationsQuery)
+    console.log(`Found ${invitationsSnapshot.size} invitations to delete`)
+    for (const invitationDoc of invitationsSnapshot.docs) {
+      await deleteDoc(invitationDoc.ref)
+    }
+    console.log('Invitations deleted successfully')
 
-  // Delete the space itself
-  const spaceRef = doc(db, 'spaces', spaceId)
-  batch.delete(spaceRef)
+    // Delete the space itself
+    console.log('Deleting space document...')
+    const spaceRef = doc(db, 'spaces', spaceId)
+    await deleteDoc(spaceRef)
+    console.log('Space deleted successfully')
 
-  await batch.commit()
+  } catch (error) {
+    console.error('Error during space deletion:', error)
+    throw error
+  }
 
   // Note: We don't remove spaceIds from users' profiles
   // The getUserSpaces function already handles non-existent spaces gracefully
