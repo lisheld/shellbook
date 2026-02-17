@@ -13,7 +13,7 @@ service cloud.firestore {
       let space = get(/databases/$(database)/documents/spaces/$(spaceId)).data;
       return request.auth != null &&
         exists(/databases/$(database)/documents/spaces/$(spaceId)) &&
-        space.members.hasAny([{uid: request.auth.uid, role: 'leader'}]);
+        space.creatorId == request.auth.uid;
     }
 
     // Default deny all
