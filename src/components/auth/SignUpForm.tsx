@@ -60,7 +60,7 @@ export default function SignUpForm() {
         <CardHeader className="text-center">
           <CardTitle className="text-3xl">Create Account</CardTitle>
           <CardDescription>
-            Sign up for ShellBook
+            Sign up for shellbook
           </CardDescription>
         </CardHeader>
 
