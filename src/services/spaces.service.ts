@@ -230,6 +230,13 @@ export async function deleteSpaceAndContent(spaceId: string): Promise<void> {
     batch.delete(doc.ref)
   })
 
+  // Delete all invitations for the space
+  const invitationsQuery = query(collection(db, 'invitations'), where('spaceId', '==', spaceId))
+  const invitationsSnapshot = await getDocs(invitationsQuery)
+  invitationsSnapshot.forEach((doc) => {
+    batch.delete(doc.ref)
+  })
+
   // Delete the space itself
   const spaceRef = doc(db, 'spaces', spaceId)
   batch.delete(spaceRef)

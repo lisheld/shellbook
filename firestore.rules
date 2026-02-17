@@ -80,9 +80,9 @@ service cloud.firestore {
         && resource.data.invitedUsername == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username
         && request.resource.data.status in ['accepted', 'declined'];
 
-      // Sender can delete (cancel) invitations
-      allow delete: if request.auth != null
-        && resource.data.invitedBy == request.auth.uid;
+      // Sender can delete (cancel) invitations, OR space leaders can delete any invitation
+      allow delete: if request.auth != null &&
+        (resource.data.invitedBy == request.auth.uid || isSpaceLeader(resource.data.spaceId));
     }
 
     // Posts collection
