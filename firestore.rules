@@ -97,9 +97,10 @@ service cloud.firestore {
         && isSpaceMember(request.resource.data.spaceId)
         && request.resource.data.caption.size() <= 500;
 
-      // Users can update/delete their own posts
-      allow update, delete: if request.auth != null
-        && resource.data.userId == request.auth.uid;
+      // Users can update/delete their own posts, OR space leaders can delete any post
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null &&
+        (resource.data.userId == request.auth.uid || isSpaceLeader(resource.data.spaceId));
     }
 
     // Comments collection
@@ -114,9 +115,9 @@ service cloud.firestore {
         && isSpaceMember(request.resource.data.spaceId)
         && request.resource.data.text.size() <= 500;
 
-      // Users can delete their own comments
-      allow delete: if request.auth != null
-        && resource.data.userId == request.auth.uid;
+      // Users can delete their own comments, OR space leaders can delete any comment
+      allow delete: if request.auth != null &&
+        (resource.data.userId == request.auth.uid || isSpaceLeader(resource.data.spaceId));
     }
   }
 }

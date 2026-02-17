@@ -44,8 +44,8 @@ export default function SignUpForm() {
     try {
       setLoading(true)
       await signup(email, password, username, displayName)
-      // Successful signup, navigate to home (will be redirected if no spaces)
-      navigate('/')
+      // Successful signup, navigate to create first space (can be skipped)
+      navigate('/create-first-space')
     } catch (err: any) {
       console.error('Signup error:', err)
       setError(err.message || 'Failed to create account')
