@@ -14,7 +14,7 @@ export interface SpaceMember {
   uid: string
   username: string
   displayName: string
-  role: 'owner' | 'admin' | 'member'
+  role: 'leader' | 'admin' | 'member'
   joinedAt: Timestamp
 }
 

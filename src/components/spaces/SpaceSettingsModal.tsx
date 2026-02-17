@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { useSpace } from '../../context/SpaceContext'
 import { Space, SpaceMember } from '../../types/Space'
-import { subscribeToSpace, removeMemberFromSpace } from '../../services/spaces.service'
+import { subscribeToSpace, removeMemberFromSpace, deleteSpaceAndContent } from '../../services/spaces.service'
 import InviteMemberModal from './InviteMemberModal'
 import { Button } from '../ui/button'
 
@@ -17,9 +19,12 @@ export default function SpaceSettingsModal({
   spaceId,
 }: SpaceSettingsModalProps) {
   const { currentUser } = useAuth()
+  const { refreshSpaces } = useSpace()
+  const navigate = useNavigate()
   const [space, setSpace] = useState<Space | null>(null)
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null)
+  const [deletingSpace, setDeletingSpace] = useState(false)
 
   useEffect(() => {
     if (!isOpen || !spaceId) return
@@ -31,8 +36,8 @@ export default function SpaceSettingsModal({
     return unsubscribe
   }, [isOpen, spaceId])
 
-  const isOwner = space?.members.some(
-    (m) => m.uid === currentUser?.uid && m.role === 'owner'
+  const isLeader = space?.members.some(
+    (m) => m.uid === currentUser?.uid && m.role === 'leader'
   )
 
   const handleRemoveMember = async (member: SpaceMember) => {
@@ -46,6 +51,24 @@ export default function SpaceSettingsModal({
       alert('Failed to remove member. Please try again.')
     } finally {
       setRemovingMemberId(null)
+    }
+  }
+
+  const handleDeleteSpace = async () => {
+    if (!confirm(
+      `Are you sure you want to delete "${space?.name}"?\n\nThis will permanently delete:\n• All photos and posts\n• All comments\n• All member data\n\nThis action cannot be undone.`
+    )) return
+
+    setDeletingSpace(true)
+    try {
+      await deleteSpaceAndContent(spaceId)
+      await refreshSpaces()
+      onClose()
+      navigate('/')
+    } catch (error) {
+      console.error('Error deleting space:', error)
+      alert('Failed to delete space. Please try again.')
+      setDeletingSpace(false)
     }
   }
 
@@ -96,7 +119,7 @@ export default function SpaceSettingsModal({
                 <h3 className="text-lg font-semibold text-gray-900">
                   Members ({space.members.length})
                 </h3>
-                {isOwner && (
+                {isLeader && (
                   <Button
                     onClick={() => setShowInviteModal(true)}
                     className="bg-gray-900 text-white hover:bg-gray-800"
@@ -124,9 +147,9 @@ export default function SpaceSettingsModal({
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
                         <p className="font-medium text-gray-900">{member.displayName}</p>
-                        {member.role === 'owner' && (
-                          <span className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-medium rounded">
-                            Owner
+                        {member.role === 'leader' && (
+                          <span className="px-2 py-0.5 bg-gray-900 text-white text-xs font-medium rounded">
+                            Leader
                           </span>
                         )}
                       </div>
@@ -136,7 +159,7 @@ export default function SpaceSettingsModal({
                       </p>
                     </div>
 
-                    {isOwner && member.uid !== currentUser?.uid && (
+                    {isLeader && member.uid !== currentUser?.uid && (
                       <Button
                         onClick={() => handleRemoveMember(member)}
                         disabled={removingMemberId === member.uid}
@@ -148,7 +171,7 @@ export default function SpaceSettingsModal({
                       </Button>
                     )}
 
-                    {member.uid === currentUser?.uid && member.role !== 'owner' && (
+                    {member.uid === currentUser?.uid && member.role !== 'leader' && (
                       <Button
                         onClick={() => handleRemoveMember(member)}
                         disabled={removingMemberId === member.uid}
@@ -163,6 +186,26 @@ export default function SpaceSettingsModal({
                 ))}
               </div>
             </div>
+
+            {/* Danger Zone - Only for Leaders */}
+            {isLeader && (
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+                  <h3 className="text-sm font-semibold text-red-900 mb-2">Danger Zone</h3>
+                  <p className="text-xs text-red-700 mb-3">
+                    Deleting this space will permanently remove all photos, posts, and comments. This action cannot be undone.
+                  </p>
+                  <Button
+                    onClick={handleDeleteSpace}
+                    disabled={deletingSpace}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white"
+                    size="sm"
+                  >
+                    {deletingSpace ? 'Deleting Space...' : 'Delete Space'}
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {/* Close Button */}
             <div className="mt-6 pt-6 border-t border-gray-200">

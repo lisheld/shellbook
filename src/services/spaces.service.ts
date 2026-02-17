@@ -15,7 +15,7 @@ import { db } from './firebase'
 import { Space, SpaceMember } from '../types/Space'
 
 /**
- * Create a new space with the creator as owner
+ * Create a new space with the creator as leader
  */
 export async function createSpace(
   creatorId: string,
@@ -28,7 +28,7 @@ export async function createSpace(
     uid: creatorId,
     username: creatorUsername,
     displayName: creatorDisplayName,
-    role: 'owner',
+    role: 'leader',
     joinedAt: Timestamp.now(),
   }
 
@@ -211,7 +211,7 @@ export async function leaveSpace(spaceId: string, userId: string): Promise<void>
 
 /**
  * Delete a space and all its content (posts, comments, images)
- * Only callable by space owner
+ * Only callable by space leader
  */
 export async function deleteSpaceAndContent(spaceId: string): Promise<void> {
   const batch = writeBatch(db)
