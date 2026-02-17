@@ -35,7 +35,7 @@ export default function LoginForm() {
         <CardHeader className="text-center">
           <CardTitle className="text-3xl">Welcome Back</CardTitle>
           <CardDescription>
-            Sign in to your ShellBook account
+            Sign in to your shellbook account
           </CardDescription>
         </CardHeader>
 
