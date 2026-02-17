@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../hooks/useAuth'
+import { useSpace } from '../../context/SpaceContext'
 import { Invitation } from '../../types/Invitation'
 import {
   subscribeToUserInvitations,
@@ -10,6 +11,7 @@ import { Button } from '../ui/button'
 
 export default function InvitationsList() {
   const { currentUser, userProfile } = useAuth()
+  const { refreshSpaces } = useSpace()
   const [invitations, setInvitations] = useState<Invitation[]>([])
   const [loading, setLoading] = useState(true)
   const [processingId, setProcessingId] = useState<string | null>(null)
@@ -36,6 +38,8 @@ export default function InvitationsList() {
         userProfile.username,
         userProfile.displayName
       )
+      // Refresh spaces to show the newly joined space immediately
+      await refreshSpaces()
     } catch (error) {
       console.error('Error accepting invitation:', error)
       alert('Failed to accept invitation. Please try again.')
