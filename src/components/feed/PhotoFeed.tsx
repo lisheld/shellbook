@@ -44,7 +44,7 @@ export default function PhotoFeed() {
               </svg>
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-3">
-              Welcome to ShellBook
+              Welcome to shellbook
             </h2>
             <p className="text-gray-600 mb-8 max-w-md mx-auto">
               Create a space to organize and share photos with different groups of people, or accept an invitation to join an existing space.

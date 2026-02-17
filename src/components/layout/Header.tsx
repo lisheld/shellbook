@@ -25,7 +25,7 @@ export default function Header() {
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center">
             <h1 className="text-xl font-semibold text-gray-900">
-              ShellBook
+              shellbook
             </h1>
           </Link>
 
